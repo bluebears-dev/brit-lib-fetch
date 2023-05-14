@@ -1,16 +1,19 @@
 import asyncio
 import dataclasses
-from io import BytesIO
 import json
 import pathlib
 import random
+from io import BytesIO
 
-from brit_lib_fetch.api import get_manuscript_page_list, get_manuscript_page_info
 import requests
-from PIL import Image, UnidentifiedImageError
-from brit_lib_fetch.api import get_manuscript_page_tile
 from loguru import logger
+from PIL import Image, UnidentifiedImageError
 
+from brit_lib_fetch.api import (
+    get_manuscript_page_info,
+    get_manuscript_page_list,
+    get_manuscript_page_tile,
+)
 from brit_lib_fetch.model import ManuscriptMetadata, ManuscriptPageMetadata
 
 _PAGE_INFO_SEMAPHORE = asyncio.Semaphore(8)
@@ -32,13 +35,9 @@ def get_manuscript_page_id_from_url(url: str) -> str:
     return url[id_pos:]
 
 
-async def _check_magnification_index(
-    manuscript_page_id: str, magnification_index: int
-) -> bool:
+async def _check_magnification_index(manuscript_page_id: str, magnification_index: int) -> bool:
     try:
-        result = await get_manuscript_page_tile(
-            manuscript_page_id, magnification_index, 0, 0
-        )
+        result = await get_manuscript_page_tile(manuscript_page_id, magnification_index, 0, 0)
     except requests.Timeout as e:
         logger.warning(f"Timeout, skipping: {e}")
         return False
@@ -99,9 +98,7 @@ async def _fetch_with_max_concurrent(
     async with _DOWNLOAD_SEMAPHORE:
         await asyncio.sleep(random.randint(0, 10))
         logger.info(f"Starting tile fetch - {manuscript_page_id} {x, y}")
-        image_data = await get_manuscript_page_tile(
-            manuscript_page_id, magnification_index, x, y
-        )
+        image_data = await get_manuscript_page_tile(manuscript_page_id, magnification_index, x, y)
 
     if not image_data:
         return
@@ -111,9 +108,7 @@ async def _fetch_with_max_concurrent(
         file.write(image_data)
 
 
-async def fetch_and_save_tiles(
-    manuscript: ManuscriptMetadata, manuscript_page: ManuscriptPageMetadata
-) -> None:
+async def fetch_and_save_tiles(manuscript: ManuscriptMetadata, manuscript_page: ManuscriptPageMetadata) -> None:
     logger.info(
         f"Fetching all parts of the image for {manuscript_page.id} with magnification {manuscript.max_magnification_index}"  # noqa: E501
     )
@@ -122,9 +117,7 @@ async def fetch_and_save_tiles(
         for x in range(manuscript_page.last_tile_x):
             for y in range(manuscript_page.last_tile_y):
                 group.create_task(
-                    _fetch_with_max_concurrent(
-                        manuscript_page.id, manuscript.max_magnification_index, x, y
-                    )
+                    _fetch_with_max_concurrent(manuscript_page.id, manuscript.max_magnification_index, x, y)
                 )
 
 
@@ -134,9 +127,7 @@ async def load_manuscript_metadata(url: str) -> ManuscriptMetadata:
     metadata_path = BASE_DIR.joinpath(manuscript_page_id, MANUSCRIPT_METADATA_FILENAME)
 
     if metadata_path.exists():
-        logger.warning(
-            f"Manuscript metadata exists, loading from file: {metadata_path}"
-        )
+        logger.warning(f"Manuscript metadata exists, loading from file: {metadata_path}")
 
         with metadata_path.open("r") as file:
             data = json.load(file)
@@ -146,9 +137,7 @@ async def load_manuscript_metadata(url: str) -> ManuscriptMetadata:
     magnification_indices = await get_magnification_indices(manuscript_page_id)
     logger.info("Fetched manuscript metadata")
 
-    return ManuscriptMetadata(
-        magnification_indices=list(magnification_indices), page_id_list=page_list
-    )
+    return ManuscriptMetadata(magnification_indices=list(magnification_indices), page_id_list=page_list)
 
 
 async def load_page_metadata(

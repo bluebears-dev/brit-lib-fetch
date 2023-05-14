@@ -1,0 +1,28 @@
+repos:
+  - repo: local
+    hooks:
+      - id: black
+        name: Run black
+        language: python
+        types: ["python"]
+        entry: poetry run black
+      - id: flake8
+        name: Run flake8
+        language: python
+        types: ["python"]
+        entry: poetry run flake8
+      - id: isort
+        name: Run isort
+        language: python
+        types: ["python"]
+        entry: poetry run isort
+      - id: deptry
+        name: Run deptry
+        language: python
+        pass_filenames: false
+        entry: poetry run deptry .
+      - id: pyright
+        name: Run pyright
+        language: python
+        types: ["python"]
+        entry: poetry run pyright

@@ -1,13 +1,14 @@
 import asyncio
 
+import requests_cache
+from loguru import logger
+
 from brit_lib_fetch.manuscript import (
     BASE_DIR,
-    load_page_metadata,
     fetch_and_save_tiles,
     load_manuscript_metadata,
+    load_page_metadata,
 )
-from loguru import logger
-import requests_cache
 
 USER_AGENT = "Mozilla/5.0 (Linux; Android 13; ONEPLUS A5010) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36"  # noqa: E501
 
@@ -30,9 +31,7 @@ async def _run():
             manuscript_page_info = await load_page_metadata(manuscript_page_id)
 
             logger.info(f"Spawning task for fetching {manuscript_page_info}")
-            group.create_task(
-                fetch_and_save_tiles(manuscript_data, manuscript_page_info)
-            )
+            group.create_task(fetch_and_save_tiles(manuscript_data, manuscript_page_info))
 
 
 def main() -> None:

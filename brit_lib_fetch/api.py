@@ -1,16 +1,15 @@
-from loguru import logger
-from brit_lib_fetch.model import ManuscriptPageMetadata
 import requests
-from urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
-from lxml import etree
 import xmltodict
+from loguru import logger
+from lxml import etree
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+from brit_lib_fetch.model import ManuscriptPageMetadata
 
 VIEWER_BL_UK_URL = "https://www.bl.uk/manuscripts/Viewer.aspx?ref={manuscript_page_id}"
 PROXY_BL_UK_URL = "https://www.bl.uk/manuscripts/Proxy.ashx?view={manuscript_page_id}_files/{zoom_index}/{x}_{y}.jpg"
-PROXY_BL_UK_METADATA_URL = (
-    "https://www.bl.uk/manuscripts/Proxy.ashx?view={manuscript_page_id}.xml"
-)
+PROXY_BL_UK_METADATA_URL = "https://www.bl.uk/manuscripts/Proxy.ashx?view={manuscript_page_id}.xml"
 
 
 def _retry_session(retries=5, backoff_factor=0.2):
@@ -36,11 +35,11 @@ async def get_manuscript_page_list(manuscript_page_id: str) -> list[str]:
     viewer_page_response = _retry_session(3, backoff_factor=0.1).get(url)
 
     logger.debug("Fetching page list from HTML")
-    page_tree = etree.fromstring(viewer_page_response.content, etree.HTMLParser())
+    page_tree = etree.fromstring(viewer_page_response.content)
     # NOTE(bluebears) - List of all possible pages of the manuscript is put into the HTML source
-    page_list = page_tree.xpath("//input[@id='PageList']")[0]
+    page_list = page_tree.xpath("//input[@id='PageList']")[0]  # type: ignore
 
-    return [page for page in page_list.get("value").split("||") if page != "##"]
+    return [page for page in page_list.get("value").split("||") if page != "##"]  # type: ignore
 
 
 async def get_manuscript_page_info(manuscript_page_id: str) -> ManuscriptPageMetadata:
@@ -66,9 +65,7 @@ async def get_manuscript_page_info(manuscript_page_id: str) -> ManuscriptPageMet
     )
 
 
-async def get_manuscript_page_tile(
-    manuscript_page_id: str, zoom_index: int, x: int, y: int
-) -> bytes:
+async def get_manuscript_page_tile(manuscript_page_id: str, zoom_index: int, x: int, y: int) -> bytes:
     url = PROXY_BL_UK_URL.format(
         manuscript_page_id=manuscript_page_id,
         zoom_index=zoom_index,

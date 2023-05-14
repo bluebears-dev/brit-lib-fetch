@@ -1,8 +1,10 @@
 import json
 import pathlib
+
 from loguru import logger
-from brit_lib_fetch.model import ManuscriptMetadata, ManuscriptPageMetadata
 from PIL import Image
+
+from brit_lib_fetch.model import ManuscriptMetadata, ManuscriptPageMetadata
 
 BASE_DIRECTORY = pathlib.Path("downloaded_manuscript")
 
@@ -10,9 +12,7 @@ BASE_DIRECTORY = pathlib.Path("downloaded_manuscript")
 def assemble_page(page_metadata: ManuscriptPageMetadata) -> None:
     page_dir = BASE_DIRECTORY.joinpath(page_metadata.id)
 
-    result_path = BASE_DIRECTORY.joinpath(
-        f"assembled-{page_metadata.id}.{page_metadata.format}"
-    )
+    result_path = BASE_DIRECTORY.joinpath(f"assembled-{page_metadata.id}.{page_metadata.format}")
 
     if result_path.exists():
         logger.warning(f"Assembled result already present, skipping: {result_path}")

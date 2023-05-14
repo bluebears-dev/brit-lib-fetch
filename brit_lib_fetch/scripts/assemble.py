@@ -1,6 +1,5 @@
 import json
 import pathlib
-from sys import exc_info
 from loguru import logger
 from brit_lib_fetch.model import ManuscriptMetadata, ManuscriptPageMetadata
 from PIL import Image

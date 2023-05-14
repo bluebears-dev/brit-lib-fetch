@@ -1,0 +1,35 @@
+[tool.poetry]
+authors = ["Paweł Górski <23619748+bluebears-dev@users.noreply.github.com>"]
+description = ""
+license = "MIT"
+name = "brit_lib_fetch"
+readme = "README.md"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+asyncio = "^3.4.3"
+loguru = "^0.7.0"
+lxml = "^4.9.2"
+pillow = "^9.5.0"
+python = "^3.11"
+requests = "^2.30.0"
+requests-cache = "^1.0.1"
+xmltodict = "^0.13.0"
+
+[tool.poetry.group.test]
+
+[tool.poetry.group.test.dependencies]
+black = "^23.3.0"
+deptry = "^0.11.0"
+flake8 = "^6.0.0"
+pyright = "^1.1.308"
+pytest = "^7.3.1"
+sh = "^2.0.3"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
+[tool.poetry.scripts]
+assemble = "brit_lib_fetch.scripts.assemble:main"
+fetch = "brit_lib_fetch.scripts.fetch:main"
